@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_dashboard"
+        android:icon="@drawable/ic_home"
+        android:title="Dashboard" />
+    <item
+        android:id="@+id/navigation_statistic"
+        android:icon="@drawable/ic_stats"
+        android:title="Statistic" />
+    <item
+        android:id="@+id/navigation_form"
+        android:icon="@drawable/ic_add_circle"
+        android:title="Form" />
+</menu>
