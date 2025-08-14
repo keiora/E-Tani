@@ -1,78 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:padding="24dp"
+    android:padding="32dp"
     android:gravity="center"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#FAFAFA">
 
     <ImageView
         android:id="@+id/logoImageView"
         android:src="@drawable/logo_e_tani"
         android:contentDescription="Logo E-Tani"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
-        android:layout_marginBottom="16dp" />
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginBottom="24dp" />
 
     <TextView
-        android:text="E-Tani App"
+        android:text="Daftar E-Tani"
         android:textSize="24sp"
         android:textStyle="bold"
-        android:layout_marginBottom="20dp"
+        android:textColor="#2E7D32"
+        android:layout_marginBottom="8dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <TextView
-        android:text="Create your account"
+        android:text="Buat akun baru untuk mulai menggunakan E-Tani"
         android:gravity="center"
-        android:textSize="16sp"
-        android:layout_marginBottom="16dp"
+        android:textColor="#666666"
+        android:textSize="14sp"
+        android:layout_marginBottom="32dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
     <EditText
         android:id="@+id/nameEditText"
-        android:hint="Name"
-        android:textSize="20dp"
+        android:hint="Nama Lengkap"
+        android:textSize="16sp"
         android:inputType="textPersonName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="16dp"
+        android:padding="16dp"
+        android:background="@drawable/edittext_background"
+        android:textColorHint="#999999"
+        android:textColor="#333333" />
 
     <EditText
         android:id="@+id/emailEditText"
         android:hint="Email"
-        android:textSize="20dp"
+        android:textSize="16sp"
         android:inputType="textEmailAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="16dp"
+        android:padding="16dp"
+        android:background="@drawable/edittext_background"
+        android:textColorHint="#999999"
+        android:textColor="#333333" />
 
     <EditText
         android:id="@+id/passwordEditText"
         android:hint="Password"
-        android:textSize="20dp"
+        android:textSize="16sp"
         android:inputType="textPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp" />
+        android:layout_marginBottom="16dp"
+        android:padding="16dp"
+        android:background="@drawable/edittext_background"
+        android:textColorHint="#999999"
+        android:textColor="#333333" />
 
     <EditText
         android:id="@+id/confirmPasswordEditText"
-        android:hint="Confirm Password"
-        android:textSize="20dp"
+        android:hint="Konfirmasi Password"
+        android:textSize="16sp"
         android:inputType="textPassword"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp" />
+        android:layout_marginBottom="32dp"
+        android:padding="16dp"
+        android:background="@drawable/edittext_background"
+        android:textColorHint="#999999"
+        android:textColor="#333333" />
 
     <Button
         android:id="@+id/signupButton"
-        android:text="Sign Up"
-        android:textColor="@android:color/white"
-        android:backgroundTint="@android:color/black"
+        android:text="Daftar"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#2E7D32"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="12dp" />
+        android:layout_height="56dp"
+        android:layout_marginBottom="16dp"
+        android:textSize="16sp"
+        android:textStyle="bold" />
 
 </LinearLayout>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:background="@drawable/card_background"
+    android:padding="16dp"
+    android:layout_marginBottom="12dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/jenisTanamanText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jenis Tanaman"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#333333"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/jumlahText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jumlah: 0"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/satuanText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Satuan: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="4dp" />
+
+        <TextView
+            android:id="@+id/tanggalText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tanggal: -"
+            android:textSize="14sp"
+            android:textColor="#666666" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/tanamanImage"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:src="@drawable/padi"
+        android:contentDescription="Tanaman"
+        android:scaleType="centerCrop" />
+</LinearLayout>

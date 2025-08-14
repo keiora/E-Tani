@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import com.github.mikephil.charting.charts.BarChart;
@@ -49,6 +50,17 @@ public class Statistic extends AppCompatActivity {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+
+        // Setup back button
+        ImageView backButton = findViewById(R.id.backButton);
+        if (backButton != null) {
+            backButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    finish(); // Kembali ke halaman sebelumnya
+                }
+            });
+        }
     }
 
     private void tampilkanChartDummy(String tanaman) {

@@ -1,46 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:background="#F8F9FA">
 
-    <!-- Dropdown Filter Tanaman -->
-    <Spinner
-        android:id="@+id/spinnerTanaman"
-        android:layout_width="match_parent"
-        android:layout_height="88dp"
-        android:spinnerMode="dropdown" />
-
-    <!-- Grafik Bar -->
-    <com.github.mikephil.charting.charts.BarChart
-        android:id="@+id/barChart"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:layout_marginTop="16dp" />
-
-    <!-- Total Panen -->
-    <TextView
-        android:id="@+id/textTotalPanen"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        android:layout_marginTop="24dp"
-        android:text="Total Panen: 0 kg"
-        android:textSize="16sp"
-        android:textStyle="bold" />
-
-    <!-- Spacer untuk dorong bottom nav ke bawah -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- Bottom Navigation -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/nav_view"
+    <!-- Header Section -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:menu="@menu/bottom_nav_menu" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:background="#FFFFFF"
+        android:elevation="2dp">
 
+        <ImageView
+            android:id="@+id/backButton"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="Back"
+            android:layout_marginEnd="16dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Statistik Panen"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="#1A1A1A"
+            android:gravity="center" />
+
+        <View
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+    </LinearLayout>
+
+    <!-- Content Section -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Filter Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Pilih Tanaman"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="12dp" />
+
+            <Spinner
+                android:id="@+id/spinnerTanaman"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:background="@drawable/spinner_background"
+                android:spinnerMode="dropdown" />
+        </LinearLayout>
+
+        <!-- Chart Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Grafik Panen Bulanan"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="16dp" />
+
+            <com.github.mikephil.charting.charts.BarChart
+                android:id="@+id/barChart"
+                android:layout_width="match_parent"
+                android:layout_height="300dp" />
+        </LinearLayout>
+
+        <!-- Summary Section -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#FFFFFF"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Ringkasan"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#333333"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:id="@+id/textTotalPanen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Total Panen: 0 kg"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#2E7D32"
+                android:gravity="center"
+                android:padding="16dp"
+                android:background="@drawable/summary_background" />
+        </LinearLayout>
+    </LinearLayout>
 </LinearLayout>
