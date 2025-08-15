@@ -13,6 +13,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 public class Dashboard extends AppCompatActivity {
 
@@ -26,6 +32,10 @@ public class Dashboard extends AppCompatActivity {
     private TextView padiTitle, padiProgress;
     private TextView jatiTitle, jatiProgress;
 
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+    private java.util.Map<String, DocumentSnapshot> latestByJenis = new java.util.HashMap<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,6 +43,10 @@ public class Dashboard extends AppCompatActivity {
 
         // Inisialisasi SharedPreferences
         sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+
+        // Init Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // Inisialisasi komponen
         searchEditText = findViewById(R.id.searchEditText);
@@ -99,32 +113,24 @@ public class Dashboard extends AppCompatActivity {
         // Set click listeners untuk bottom navigation
         setupBottomNavigation();
 
+        // Setup filter buttons
+        setupFilterButtons();
+
         // Search functionality
         searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, android.view.KeyEvent event) {
                 if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                     String keyword = searchEditText.getText().toString().trim();
-                    if (!keyword.isEmpty()) {
-                        Toast.makeText(Dashboard.this, "Mencari: " + keyword, Toast.LENGTH_SHORT).show();
-                        // TODO: Implementasi search functionality
-                    }
+                    applySearch(keyword);
                     return true;
                 }
                 return false;
             }
         });
 
-        // Tampilkan data dari Intent jika ada
-        Intent intent = getIntent();
-        if (intent != null && intent.hasExtra("nama_tanaman") && intent.hasExtra("jumlah")) {
-            String nama = intent.getStringExtra("nama_tanaman");
-            String jumlah = intent.getStringExtra("jumlah");
-            Toast.makeText(this, "Data baru: " + nama + " - " + jumlah, Toast.LENGTH_LONG).show();
-        }
-        
-        // Load dan tampilkan data dari SharedPreferences
-        loadDataFromSharedPreferences();
+        // Muat data dari Firestore
+        loadDashboardData();
     }
 
     private void setupBottomNavigation() {
@@ -169,6 +175,48 @@ public class Dashboard extends AppCompatActivity {
         }
     }
 
+    private void setupFilterButtons() {
+        // Done filter button
+        LinearLayout doneFilter = findViewById(R.id.doneFilter);
+        if (doneFilter != null) {
+            doneFilter.setOnClickListener(v -> {
+                Intent intent = new Intent(Dashboard.this, HarvestListActivity.class);
+                intent.putExtra("status", "done");
+                startActivity(intent);
+            });
+        }
+
+        // History filter button
+        LinearLayout historyFilter = findViewById(R.id.historyFilter);
+        if (historyFilter != null) {
+            historyFilter.setOnClickListener(v -> {
+                Intent intent = new Intent(Dashboard.this, HarvestListActivity.class);
+                intent.putExtra("status", "history");
+                startActivity(intent);
+            });
+        }
+
+        // Reject filter button
+        LinearLayout rejectFilter = findViewById(R.id.rejectFilter);
+        if (rejectFilter != null) {
+            rejectFilter.setOnClickListener(v -> {
+                Intent intent = new Intent(Dashboard.this, HarvestListActivity.class);
+                intent.putExtra("status", "reject");
+                startActivity(intent);
+            });
+        }
+
+        // Waiting filter button
+        LinearLayout waitingFilter = findViewById(R.id.waitingFilter);
+        if (waitingFilter != null) {
+            waitingFilter.setOnClickListener(v -> {
+                Intent intent = new Intent(Dashboard.this, HarvestListActivity.class);
+                intent.putExtra("status", "waiting");
+                startActivity(intent);
+            });
+        }
+    }
+
     private void showLogoutDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Logout");
@@ -194,32 +242,93 @@ public class Dashboard extends AppCompatActivity {
         builder.show();
     }
     
-    private void loadDataFromSharedPreferences() {
-        // Ambil data dari SharedPreferences
-        String jenis = sharedPreferences.getString("jenis", "");
-        String jumlah = sharedPreferences.getString("jumlah", "");
-        String satuan = sharedPreferences.getString("satuan", "");
-        String tanggal = sharedPreferences.getString("tanggal", "");
-        
-        // Update card berdasarkan jenis tanaman
-        if (!jenis.isEmpty()) {
-            if (jenis.toLowerCase().contains("jagung")) {
-                jagungTitle.setText("Data Jagung");
-                jagungProgress.setText(jumlah + " " + satuan + " - " + tanggal);
-            } else if (jenis.toLowerCase().contains("padi")) {
-                padiTitle.setText("Data Padi");
-                padiProgress.setText(jumlah + " " + satuan + " - " + tanggal);
-            } else if (jenis.toLowerCase().contains("jati")) {
-                jatiTitle.setText("Data Jati");
-                jatiProgress.setText(jumlah + " " + satuan + " - " + tanggal);
-            }
+    private void loadDashboardData() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("harvests")
+                .whereEqualTo("userId", user.getUid())
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(query -> {
+                    latestByJenis.clear();
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        String jenis = safeLower(doc.getString("jenis"));
+                        if (jenis == null || jenis.isEmpty()) continue;
+                        // Simpan entri terbaru per jenis
+                        if (!latestByJenis.containsKey(jenis)) {
+                            latestByJenis.put(jenis, doc);
+                        }
+                    }
+                    // Render cards default
+                    renderCard("jagung", jagungTitle, jagungProgress, "Data Jagung");
+                    renderCard("padi", padiTitle, padiProgress, "Data Padi");
+                    renderCard("jati", jatiTitle, jatiProgress, "Data Jati");
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(Dashboard.this, "Gagal memuat data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void applySearch(String keywordRaw) {
+        String keyword = keywordRaw == null ? "" : keywordRaw.trim().toLowerCase();
+        if (keyword.isEmpty()) {
+            // Reset to default rendering
+            renderCard("jagung", jagungTitle, jagungProgress, "Data Jagung");
+            renderCard("padi", padiTitle, padiProgress, "Data Padi");
+            renderCard("jati", jatiTitle, jatiProgress, "Data Jati");
+            return;
+        }
+
+        boolean any = false;
+        if ("jagung".contains(keyword)) { renderCard("jagung", jagungTitle, jagungProgress, "Data Jagung"); any = true; } else { setEmpty(jagungTitle, jagungProgress, "Data Jagung"); }
+        if ("padi".contains(keyword)) { renderCard("padi", padiTitle, padiProgress, "Data Padi"); any = true; } else { setEmpty(padiTitle, padiProgress, "Data Padi"); }
+        if ("jati".contains(keyword)) { renderCard("jati", jatiTitle, jatiProgress, "Data Jati"); any = true; } else { setEmpty(jatiTitle, jatiProgress, "Data Jati"); }
+
+        if (!any) {
+            Toast.makeText(this, "Tidak ada hasil untuk: " + keywordRaw, Toast.LENGTH_SHORT).show();
         }
     }
+
+    private void renderCard(String jenisKey, TextView title, TextView progress, String defaultTitle) {
+        title.setText(defaultTitle);
+        DocumentSnapshot doc = latestByJenis.get(jenisKey);
+        if (doc == null) {
+            progress.setText("Belum ada data");
+            return;
+        }
+        String jumlah = valueOrEmpty(doc.getString("jumlah"));
+        String satuan = valueOrEmpty(doc.getString("satuan"));
+        String tanggal = valueOrEmpty(doc.getString("tanggal"));
+        if (tanggal.isEmpty()) {
+            Timestamp ts = doc.getTimestamp("createdAt");
+            if (ts != null) {
+                java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy", java.util.Locale.getDefault());
+                tanggal = sdf.format(ts.toDate());
+            }
+        }
+        String info = jumlah;
+        if (!satuan.isEmpty()) info += " " + satuan;
+        if (!tanggal.isEmpty()) info += " - " + tanggal;
+        if (info.isEmpty()) info = "Belum ada data";
+        progress.setText(info);
+    }
+
+    private void setEmpty(TextView title, TextView progress, String defaultTitle) {
+        title.setText(defaultTitle);
+        progress.setText("Belum ada data");
+    }
+
+    private String valueOrEmpty(String s) { return s == null ? "" : s; }
+    private String safeLower(String s) { return s == null ? null : s.toLowerCase(); }
     
     @Override
     protected void onResume() {
         super.onResume();
-        // Reload data setiap kali kembali ke Dashboard
-        loadDataFromSharedPreferences();
+        // Reload data setiap kali kembali ke Dashboard dari Firestore
+        loadDashboardData();
     }
 }

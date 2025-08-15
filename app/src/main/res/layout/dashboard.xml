@@ -135,6 +135,7 @@
             android:paddingHorizontal="20dp">
 
             <LinearLayout
+                android:id="@+id/doneFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -161,6 +162,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/historyFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -186,6 +188,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/rejectFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -211,6 +214,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/waitingFilter"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
