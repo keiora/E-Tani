@@ -148,14 +148,14 @@
                 <ImageView
                     android:layout_width="16dp"
                     android:layout_height="16dp"
-                    android:src="@drawable/ic_heart"
-                    android:contentDescription="Done"
+                    android:src="@drawable/ic_list"
+                    android:contentDescription="Semua Data"
                     android:layout_marginEnd="8dp" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Done"
+                    android:text="Semua Data"
                     android:textSize="14sp"
                     android:textColor="#2E7D32"
                     android:textStyle="bold" />
@@ -169,8 +169,7 @@
                 android:gravity="center"
                 android:background="@drawable/filter_button_background"
                 android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp"
-                android:layout_marginEnd="12dp">
+                android:paddingVertical="12dp">
 
                 <ImageView
                     android:layout_width="16dp"
@@ -186,61 +185,10 @@
                     android:textSize="14sp"
                     android:textColor="#666666" />
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/rejectFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:background="@drawable/filter_button_background"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp"
-                android:layout_marginEnd="12dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_list"
-                    android:contentDescription="Reject"
-                    android:layout_marginEnd="8dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Reject"
-                    android:textSize="14sp"
-                    android:textColor="#666666" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/waitingFilter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:background="@drawable/filter_button_background"
-                android:paddingHorizontal="16dp"
-                android:paddingVertical="12dp">
-
-                <ImageView
-                    android:layout_width="16dp"
-                    android:layout_height="16dp"
-                    android:src="@drawable/ic_list"
-                    android:contentDescription="Waiting"
-                    android:layout_marginEnd="8dp" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Waiting"
-                    android:textSize="14sp"
-                    android:textColor="#666666" />
-            </LinearLayout>
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Data Cards Section -->
+    <!-- Data List Section -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -248,143 +196,13 @@
         android:orientation="vertical"
         android:paddingHorizontal="20dp">
 
-        <!-- Data Jagung Card -->
-        <LinearLayout
-            android:id="@+id/jagungCard"
+        <!-- RecyclerView untuk menampilkan semua data -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/dataRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true">
+            android:layout_height="match_parent"
+            android:visibility="visible" />
 
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/jagungTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Data Jagung"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/jagungProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Belum ada data"
-                    android:textSize="12sp"
-                    android:textColor="#666666" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/padi"
-                android:contentDescription="Jagung"
-                android:scaleType="centerCrop" />
-        </LinearLayout>
-
-        <!-- Data Padi Card -->
-        <LinearLayout
-            android:id="@+id/padiCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/padiTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Data Padi"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/padiProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Belum ada data"
-                    android:textSize="12sp"
-                    android:textColor="#666666" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/padi"
-                android:contentDescription="Padi"
-                android:scaleType="centerCrop" />
-        </LinearLayout>
-
-        <!-- Data Jati Card -->
-        <LinearLayout
-            android:id="@+id/jatiCard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/card_background"
-            android:padding="16dp"
-            android:layout_marginBottom="12dp"
-            android:clickable="true"
-            android:focusable="true">
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/jatiTitle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Data Jati"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="#333333"
-                    android:layout_marginBottom="8dp" />
-
-                <TextView
-                    android:id="@+id/jatiProgress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Belum ada data"
-                    android:textSize="12sp"
-                    android:textColor="#666666" />
-            </LinearLayout>
-
-            <ImageView
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:src="@drawable/padi"
-                android:contentDescription="Jati"
-                android:scaleType="centerCrop" />
-        </LinearLayout>
     </LinearLayout>
 
     <!-- Bottom Navigation -->

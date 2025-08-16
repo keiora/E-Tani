@@ -1,7 +1,6 @@
 package com.example.e_tani;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,8 +9,14 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import java.util.ArrayList;
 import java.util.List;
+import android.widget.Toast;
 
 public class DetailDataActivity extends AppCompatActivity {
 
@@ -21,7 +26,8 @@ public class DetailDataActivity extends AppCompatActivity {
     private TextView headerTitle;
     private ImageView backButton, addButton;
     private String jenisTanaman;
-    private SharedPreferences sharedPreferences;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,8 +40,9 @@ public class DetailDataActivity extends AppCompatActivity {
             jenisTanaman = "Tanaman";
         }
 
-        // Inisialisasi SharedPreferences
-        sharedPreferences = getSharedPreferences("PanenPrefs", MODE_PRIVATE);
+        // Init Firebase
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         // Inisialisasi komponen
         dataRecyclerView = findViewById(R.id.dataRecyclerView);
@@ -75,29 +82,48 @@ public class DetailDataActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        List<DataModel> dataList = new ArrayList<>();
-
-        // Ambil data dari SharedPreferences
-        String jenis = sharedPreferences.getString("jenis", "");
-        String jumlah = sharedPreferences.getString("jumlah", "");
-        String satuan = sharedPreferences.getString("satuan", "");
-        String tanggal = sharedPreferences.getString("tanggal", "");
-
-        // Jika ada data dan jenis tanaman sesuai
-        if (!jenis.isEmpty() && jenis.toLowerCase().contains(jenisTanaman.toLowerCase())) {
-            String foto = sharedPreferences.getString("foto", "");
-            dataList.add(new DataModel(jenis, jumlah, satuan, tanggal, foto));
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
         }
 
-        // Update UI
-        if (dataList.isEmpty()) {
-            emptyState.setVisibility(View.VISIBLE);
-            dataRecyclerView.setVisibility(View.GONE);
-        } else {
-            emptyState.setVisibility(View.GONE);
-            dataRecyclerView.setVisibility(View.VISIBLE);
-            dataAdapter.updateData(dataList);
-        }
+        // Load data dari Firestore berdasarkan jenis tanaman
+        db.collection("harvests")
+                .whereEqualTo("userId", user.getUid())
+                .whereEqualTo("jenis", jenisTanaman)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(query -> {
+                    List<DataModel> dataList = new ArrayList<>();
+                    
+                    for (DocumentSnapshot doc : query.getDocuments()) {
+                        String jenis = doc.getString("jenis");
+                        String jumlah = doc.getString("jumlah");
+                        String satuan = doc.getString("satuan");
+                        String tanggal = doc.getString("tanggal");
+                        String status = doc.getString("status");
+                        
+                        if (jenis != null && jenis.equalsIgnoreCase(jenisTanaman)) {
+                            dataList.add(new DataModel(jenis, jumlah, satuan, tanggal));
+                        }
+                    }
+                    
+                    // Update UI
+                    if (dataList.isEmpty()) {
+                        emptyState.setVisibility(View.VISIBLE);
+                        dataRecyclerView.setVisibility(View.GONE);
+                    } else {
+                        emptyState.setVisibility(View.GONE);
+                        dataRecyclerView.setVisibility(View.VISIBLE);
+                        dataAdapter.updateData(dataList);
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Gagal memuat data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    emptyState.setVisibility(View.VISIBLE);
+                    dataRecyclerView.setVisibility(View.GONE);
+                });
     }
 
     @Override

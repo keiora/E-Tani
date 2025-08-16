@@ -68,14 +68,8 @@ public class HarvestListActivity extends AppCompatActivity {
 
     private void setTitleByStatus() {
         switch (currentStatus) {
-            case "done":
-                titleText.setText("Data Panen Disetujui");
-                break;
-            case "reject":
-                titleText.setText("Data Panen Ditolak");
-                break;
-            case "waiting":
-                titleText.setText("Data Panen Menunggu");
+            case "all":
+                titleText.setText("Semua Data Panen");
                 break;
             case "history":
                 titleText.setText("Riwayat Panen");
@@ -92,19 +86,42 @@ public class HarvestListActivity extends AppCompatActivity {
             return;
         }
 
+        // Debug: print status yang sedang dicari
+        System.out.println("HarvestListActivity: Loading data for status: " + currentStatus);
+
         Query query = db.collection("harvests")
                 .whereEqualTo("userId", user.getUid());
 
-        // Apply status filter
-        if (!"history".equals(currentStatus)) {
-            query = query.whereEqualTo("status", currentStatus);
+        // Apply status filter untuk semua status
+        if ("all".equals(currentStatus)) {
+            // Untuk all, ambil semua data tanpa filter status
+            System.out.println("All mode: getting all data without status filter");
+        } else if ("history".equals(currentStatus)) {
+            // Untuk history, ambil data yang sudah selesai (done/reject) atau lama
+            System.out.println("History mode: getting completed data (done/reject)");
         }
 
         query.orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    System.out.println("Found " + queryDocumentSnapshots.getDocuments().size() + " documents");
+                    
                     harvestList.clear();
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        String docStatus = doc.getString("status");
+                        System.out.println("Document status: " + docStatus + ", jenis: " + doc.getString("jenis"));
+                        
+                        // Untuk history, filter data yang sudah selesai
+                        if ("history".equals(currentStatus)) {
+                            if ("waiting".equals(docStatus)) {
+                                continue; // Skip data yang masih waiting
+                            }
+                            // Hanya tampilkan data dengan status done atau reject
+                            if (!"done".equals(docStatus) && !"reject".equals(docStatus)) {
+                                continue;
+                            }
+                        }
+                        
                         HarvestData harvest = new HarvestData();
                         harvest.setId(doc.getId());
                         harvest.setJenis(doc.getString("jenis"));
@@ -121,9 +138,12 @@ public class HarvestListActivity extends AppCompatActivity {
                         
                         harvestList.add(harvest);
                     }
+                    
+                    System.out.println("Added " + harvestList.size() + " items to list");
                     adapter.notifyDataSetChanged();
                 })
                 .addOnFailureListener(e -> {
+                    System.out.println("Error loading harvest data: " + e.getMessage());
                     Toast.makeText(this, "Gagal memuat data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }

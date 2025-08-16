@@ -137,52 +137,123 @@ public class Login extends AppCompatActivity {
     }
 
     private void ensureUserDocIfMissing(FirebaseUser user, GoogleSignInAccount account) {
+        System.out.println("Ensuring user document exists for: " + user.getUid());
         db.collection("users").document(user.getUid()).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
+                        System.out.println("User document exists, fetching role");
                         fetchRoleAndNavigate(user.getUid());
                     } else {
+                        System.out.println("User document does not exist, creating new one");
                         java.util.Map<String, Object> userDoc = new java.util.HashMap<>();
                         userDoc.put("name", account.getDisplayName() != null ? account.getDisplayName() : "");
                         userDoc.put("email", account.getEmail() != null ? account.getEmail() : "");
                         userDoc.put("provider", "google");
                         userDoc.put("emailVerified", user.isEmailVerified());
-                        userDoc.put("role", "user");
+                        userDoc.put("role", "petani"); // Default role untuk user baru
+                        userDoc.put("createdAt", com.google.firebase.Timestamp.now());
+                        
+                        System.out.println("Creating user document with role: petani");
                         db.collection("users").document(user.getUid()).set(userDoc, SetOptions.merge())
-                                .addOnSuccessListener(unused -> fetchRoleAndNavigate(user.getUid()))
+                                .addOnSuccessListener(unused -> {
+                                    System.out.println("User document created successfully");
+                                    fetchRoleAndNavigate(user.getUid());
+                                })
                                 .addOnFailureListener(e -> {
+                                    System.out.println("Failed to create user document: " + e.getMessage());
                                     Toast.makeText(Login.this, "Gagal menyimpan user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                 });
                     }
                 })
                 .addOnFailureListener(e -> {
+                    System.out.println("Error checking user document: " + e.getMessage());
                     Toast.makeText(Login.this, "Gagal mengambil data user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
     private void fetchRoleAndNavigate(String uid) {
+        System.out.println("Fetching role for user: " + uid);
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (!documentSnapshot.exists()) {
-                        Toast.makeText(Login.this, "Data user tidak ditemukan di database", Toast.LENGTH_SHORT).show();
+                        System.out.println("User document does not exist, creating default user role");
+                        // Buat document user dengan role default
+                        java.util.Map<String, Object> userDoc = new java.util.HashMap<>();
+                        userDoc.put("role", "petani"); // Default role
+                        userDoc.put("email", mAuth.getCurrentUser().getEmail());
+                        userDoc.put("name", mAuth.getCurrentUser().getDisplayName() != null ? mAuth.getCurrentUser().getDisplayName() : "");
+                        
+                        db.collection("users").document(uid).set(userDoc)
+                                .addOnSuccessListener(unused -> {
+                                    System.out.println("Created user document with petani role");
+                                    navigateToDashboard();
+                                })
+                                .addOnFailureListener(e -> {
+                                    System.out.println("Failed to create user document: " + e.getMessage());
+                                    Toast.makeText(Login.this, "Gagal membuat data user: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                         return;
                     }
+                    
                     String role = documentSnapshot.getString("role");
+                    System.out.println("User role found: " + role);
+                    
                     if (role == null) {
-                        Toast.makeText(Login.this, "Role tidak dikenali", Toast.LENGTH_SHORT).show();
+                        System.out.println("Role is null, setting default role to petani");
+                        // Update role jika null
+                        java.util.Map<String, Object> updateData = new java.util.HashMap<>();
+                        updateData.put("role", "petani");
+                        db.collection("users").document(uid).update(updateData)
+                                .addOnSuccessListener(unused -> {
+                                    System.out.println("Updated user role to petani");
+                                    navigateToDashboard();
+                                })
+                                .addOnFailureListener(e -> {
+                                    System.out.println("Failed to update role: " + e.getMessage());
+                                    Toast.makeText(Login.this, "Gagal update role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                         return;
                     }
 
                     if (role.equalsIgnoreCase("admin")) {
+                        System.out.println("Navigating to Statistic (admin)");
                         startActivity(new Intent(Login.this, Statistic.class));
                         finish();
-                    } else if (role.equalsIgnoreCase("petani")) {
-                        startActivity(new Intent(Login.this, Dashboard.class));
-                        finish();
+                    } else if (role.equalsIgnoreCase("petani") || role.equalsIgnoreCase("user")) {
+                        System.out.println("Navigating to Dashboard (petani/user)");
+                        navigateToDashboard();
                     } else {
-                        Toast.makeText(Login.this, "Role tidak dikenali", Toast.LENGTH_SHORT).show();
+                        System.out.println("Unknown role: " + role + ", defaulting to petani");
+                        // Jika role tidak dikenali, default ke petani
+                        java.util.Map<String, Object> updateData = new java.util.HashMap<>();
+                        updateData.put("role", "petani");
+                        db.collection("users").document(uid).update(updateData)
+                                .addOnSuccessListener(unused -> {
+                                    System.out.println("Updated unknown role to petani");
+                                    navigateToDashboard();
+                                })
+                                .addOnFailureListener(e -> {
+                                    System.out.println("Failed to update unknown role: " + e.getMessage());
+                                    Toast.makeText(Login.this, "Gagal update role: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                });
                     }
                 })
-                .addOnFailureListener(e -> Toast.makeText(Login.this, e.getMessage(), Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(e -> {
+                    System.out.println("Error fetching user role: " + e.getMessage());
+                    Toast.makeText(Login.this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+    
+    private void navigateToDashboard() {
+        // Simpan status login
+        android.content.SharedPreferences sharedPreferences = getSharedPreferences("LoginPrefs", MODE_PRIVATE);
+        android.content.SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean("isLoggedIn", true);
+        editor.apply();
+        
+        System.out.println("Login successful, navigating to Dashboard");
+        Intent intent = new Intent(Login.this, Dashboard.class);
+        startActivity(intent);
+        finish();
     }
 }

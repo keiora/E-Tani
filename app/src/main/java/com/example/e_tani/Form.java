@@ -136,16 +136,28 @@ public class Form extends AppCompatActivity {
         doc.put("createdAt", Timestamp.now());
         doc.put("status", "waiting"); // Initial status: waiting for admin approval
 
+        // Debug: print data yang akan disimpan
+        System.out.println("Saving document with data:");
+        System.out.println("jenis: " + jenis);
+        System.out.println("jumlah: " + jumlah);
+        System.out.println("satuan: " + satuan);
+        System.out.println("tanggal: " + tanggal);
+        System.out.println("userId: " + uid);
+
         db.collection("harvests").add(doc)
                 .addOnSuccessListener(documentReference -> {
+                    System.out.println("Document saved successfully with ID: " + documentReference.getId());
                     Toast.makeText(Form.this, "Data berhasil disimpan", Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(Form.this, Dashboard.class);
                     intent.putExtra("nama_tanaman", jenis);
                     intent.putExtra("jumlah", jumlah);
+                    // Tambahkan flag untuk memaksa refresh
+                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(intent);
                     finish();
                 })
                 .addOnFailureListener(e -> {
+                    System.out.println("Failed to save document: " + e.getMessage());
                     Toast.makeText(Form.this, "Gagal menyimpan: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     submitButton.setEnabled(true);
                 });

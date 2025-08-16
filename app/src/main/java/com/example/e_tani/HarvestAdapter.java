@@ -11,9 +11,19 @@ import java.util.List;
 public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestViewHolder> {
 
     private List<HarvestListActivity.HarvestData> harvestList;
+    private OnItemClickListener listener;
+
+    public interface OnItemClickListener {
+        void onItemClick(HarvestListActivity.HarvestData harvest);
+    }
 
     public HarvestAdapter(List<HarvestListActivity.HarvestData> harvestList) {
         this.harvestList = harvestList;
+    }
+
+    public HarvestAdapter(List<HarvestListActivity.HarvestData> harvestList, OnItemClickListener listener) {
+        this.harvestList = harvestList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -28,12 +38,29 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
     public void onBindViewHolder(@NonNull HarvestViewHolder holder, int position) {
         HarvestListActivity.HarvestData harvest = harvestList.get(position);
         
+        // Tampilkan jenis tanaman dengan format yang jelas
         holder.jenisText.setText(harvest.getJenis());
-        holder.jumlahText.setText(harvest.getJumlah() + " " + harvest.getSatuan());
-        holder.tanggalText.setText(harvest.getTanggal());
+        
+        // Tampilkan jumlah dengan format yang jelas (contoh: "100 kg")
+        String jumlahText = harvest.getJumlah() + " " + harvest.getSatuan();
+        holder.jumlahText.setText(jumlahText);
+        
+        // Tampilkan tanggal dengan format yang jelas
+        holder.tanggalText.setText("Tanggal: " + harvest.getTanggal());
+        
+        // Tampilkan status dengan format yang jelas
         holder.statusText.setText(getStatusText(harvest.getStatus()));
         holder.statusText.setTextColor(getStatusColor(harvest.getStatus()));
-        holder.createdAtText.setText(harvest.getCreatedAt());
+        
+        // Tampilkan waktu pembuatan dengan format yang jelas
+        holder.createdAtText.setText("Dibuat: " + harvest.getCreatedAt());
+        
+        // Tambahkan click listener untuk card
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(harvest);
+            }
+        });
     }
 
     @Override
