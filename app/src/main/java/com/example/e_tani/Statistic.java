@@ -96,13 +96,17 @@ public class Statistic extends AppCompatActivity {
                 .whereEqualTo("userId", user.getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
+                    System.out.println("Total documents found: " + queryDocumentSnapshots.getDocuments().size());
                     Set<String> uniqueTanaman = new HashSet<>();
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        String jenis = doc.getString("jenis");
+                        String jenis = doc.getString("jenisTanaman");
+                        String jumlah = doc.getString("jumlahPanen");
+                        System.out.println("Document: jenisTanaman=" + jenis + ", jumlahPanen=" + jumlah);
                         if (jenis != null && !jenis.trim().isEmpty()) {
                             uniqueTanaman.add(jenis);
                         }
                     }
+                    System.out.println("Unique tanaman found: " + uniqueTanaman.size());
                     tanamanList.clear();
                     tanamanList.add("Pilih Tanaman");
                     tanamanList.addAll(uniqueTanaman);
@@ -122,7 +126,7 @@ public class Statistic extends AppCompatActivity {
 
         db.collection("harvests")
                 .whereEqualTo("userId", user.getUid())
-                .whereEqualTo("jenis", tanaman)
+                .whereEqualTo("jenisTanaman", tanaman)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     float[] totalPerBulan = new float[12];
@@ -130,7 +134,7 @@ public class Statistic extends AppCompatActivity {
                     String satuan = "";
 
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        String jumlahStr = doc.getString("jumlah");
+                        String jumlahStr = doc.getString("jumlahPanen");
                         String satuanDoc = doc.getString("satuan");
                         if (satuan.isEmpty() && satuanDoc != null) {
                             satuan = satuanDoc;

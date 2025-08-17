@@ -76,6 +76,16 @@ public class Dashboard extends AppCompatActivity {
             public void onItemClick(HarvestListActivity.HarvestData harvest) {
                 showHarvestDetailDialog(harvest);
             }
+            
+            @Override
+            public void onEditClick(HarvestListActivity.HarvestData harvest) {
+                showEditHarvestDialog(harvest);
+            }
+            
+            @Override
+            public void onDeleteClick(HarvestListActivity.HarvestData harvest) {
+                showDeleteConfirmationDialog(harvest);
+            }
         });
         dataRecyclerView.setAdapter(dataAdapter);
         dataRecyclerView.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
@@ -270,11 +280,20 @@ public class Dashboard extends AppCompatActivity {
                     for (DocumentSnapshot doc : query.getDocuments()) {
                         HarvestListActivity.HarvestData harvestData = new HarvestListActivity.HarvestData();
                         harvestData.setId(doc.getId());
-                        harvestData.setJenis(doc.getString("jenis"));
-                        harvestData.setJumlah(doc.getString("jumlah"));
+                        // Gunakan field baru yang sudah diupdate di Form.java
+                        harvestData.setJenis(doc.getString("jenisTanaman"));
+                        harvestData.setJumlah(doc.getString("jumlahPanen"));
                         harvestData.setSatuan(doc.getString("satuan"));
-                        harvestData.setTanggal(doc.getString("tanggal"));
+                        harvestData.setTanggal(doc.getString("tanggalPanen"));
                         harvestData.setStatus(doc.getString("status"));
+                        
+                        // Set field baru
+                        harvestData.setLuasLahan(doc.getString("luasLahan"));
+                        harvestData.setMusim(doc.getString("musim"));
+                        harvestData.setKualitas(doc.getString("kualitas"));
+                        harvestData.setHargaJual(doc.getString("hargaJual"));
+                        harvestData.setLokasiLahan(doc.getString("lokasiLahan"));
+                        harvestData.setCatatan(doc.getString("catatan"));
                         
                         Timestamp ts = doc.getTimestamp("createdAt");
                         if (ts != null) {
@@ -283,7 +302,15 @@ public class Dashboard extends AppCompatActivity {
                         }
                         
                         allData.add(harvestData);
-                        System.out.println("Found data: " + harvestData.getJenis() + " - " + harvestData.getJumlah() + " " + harvestData.getSatuan() + " - Status: " + harvestData.getStatus());
+                        System.out.println("=== PROCESSED DATA ===");
+                        System.out.println("ID: " + harvestData.getId());
+                        System.out.println("Jenis: " + harvestData.getJenis());
+                        System.out.println("Jumlah: " + harvestData.getJumlah());
+                        System.out.println("Satuan: " + harvestData.getSatuan());
+                        System.out.println("Tanggal: " + harvestData.getTanggal());
+                        System.out.println("Status: " + harvestData.getStatus());
+                        System.out.println("CreatedAt: " + harvestData.getCreatedAt());
+                        System.out.println("---");
                     }
                     
                     // Tampilkan data real yang masuk
@@ -334,10 +361,11 @@ public class Dashboard extends AppCompatActivity {
                     for (DocumentSnapshot doc : query.getDocuments()) {
                         HarvestListActivity.HarvestData harvestData = new HarvestListActivity.HarvestData();
                         harvestData.setId(doc.getId());
-                        harvestData.setJenis(doc.getString("jenis"));
-                        harvestData.setJumlah(doc.getString("jumlah"));
+                        // Gunakan field baru yang sudah diupdate di Form.java
+                        harvestData.setJenis(doc.getString("jenisTanaman"));
+                        harvestData.setJumlah(doc.getString("jumlahPanen"));
                         harvestData.setSatuan(doc.getString("satuan"));
-                        harvestData.setTanggal(doc.getString("tanggal"));
+                        harvestData.setTanggal(doc.getString("tanggalPanen"));
                         harvestData.setStatus(doc.getString("status"));
                         
                         Timestamp ts = doc.getTimestamp("createdAt");
@@ -376,53 +404,174 @@ public class Dashboard extends AppCompatActivity {
     
     // Method untuk menampilkan detail data dalam dialog
     private void showHarvestDetailDialog(HarvestListActivity.HarvestData harvest) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
         builder.setTitle("Detail Data Panen");
         
-        // Buat layout untuk dialog
+        // Buat layout untuk dialog dengan background putih
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
         layout.setPadding(50, 30, 50, 30);
+        layout.setBackgroundColor(getResources().getColor(android.R.color.white));
         
-        // Tambahkan TextView untuk setiap field
+        // Tambahkan TextView untuk setiap field dengan styling yang lebih bagus
         TextView jenisText = new TextView(this);
-        jenisText.setText("Jenis Tanaman: " + harvest.getJenis());
+        jenisText.setText("Jenis Tanaman: " + (harvest.getJenis() != null ? harvest.getJenis() : "Tidak ada data"));
         jenisText.setTextSize(16);
         jenisText.setTextColor(getResources().getColor(android.R.color.black));
-        jenisText.setPadding(0, 10, 0, 10);
+        jenisText.setPadding(0, 15, 0, 15);
+        jenisText.setTypeface(null, android.graphics.Typeface.BOLD);
         layout.addView(jenisText);
         
         TextView jumlahText = new TextView(this);
-        jumlahText.setText("Jumlah: " + harvest.getJumlah() + " " + harvest.getSatuan());
+        jumlahText.setText("Jumlah: " + (harvest.getJumlah() != null ? harvest.getJumlah() : "Tidak ada data") + " " + (harvest.getSatuan() != null ? harvest.getSatuan() : ""));
         jumlahText.setTextSize(16);
         jumlahText.setTextColor(getResources().getColor(android.R.color.black));
-        jumlahText.setPadding(0, 10, 0, 10);
+        jumlahText.setPadding(0, 15, 0, 15);
         layout.addView(jumlahText);
         
+        TextView luasLahanText = new TextView(this);
+        luasLahanText.setText("Luas Lahan: " + (harvest.getLuasLahan() != null ? harvest.getLuasLahan() : "Tidak ada data") + " Hektar");
+        luasLahanText.setTextSize(16);
+        luasLahanText.setTextColor(getResources().getColor(android.R.color.black));
+        luasLahanText.setPadding(0, 15, 0, 15);
+        layout.addView(luasLahanText);
+        
+        TextView musimText = new TextView(this);
+        musimText.setText("Musim: " + (harvest.getMusim() != null ? harvest.getMusim() : "Tidak ada data"));
+        musimText.setTextSize(16);
+        musimText.setTextColor(getResources().getColor(android.R.color.black));
+        musimText.setPadding(0, 15, 0, 15);
+        layout.addView(musimText);
+        
+        TextView kualitasText = new TextView(this);
+        kualitasText.setText("Kualitas: " + (harvest.getKualitas() != null ? harvest.getKualitas() : "Tidak ada data"));
+        kualitasText.setTextSize(16);
+        kualitasText.setTextColor(getResources().getColor(android.R.color.black));
+        kualitasText.setPadding(0, 15, 0, 15);
+        layout.addView(kualitasText);
+        
+        TextView hargaJualText = new TextView(this);
+        hargaJualText.setText("Harga Jual: Rp " + (harvest.getHargaJual() != null ? harvest.getHargaJual() : "0"));
+        hargaJualText.setTextSize(16);
+        hargaJualText.setTextColor(getResources().getColor(android.R.color.black));
+        hargaJualText.setPadding(0, 15, 0, 15);
+        layout.addView(hargaJualText);
+        
+        TextView lokasiLahanText = new TextView(this);
+        lokasiLahanText.setText("Lokasi Lahan: " + (harvest.getLokasiLahan() != null ? harvest.getLokasiLahan() : "Tidak ada data"));
+        lokasiLahanText.setTextSize(16);
+        lokasiLahanText.setTextColor(getResources().getColor(android.R.color.black));
+        lokasiLahanText.setPadding(0, 15, 0, 15);
+        layout.addView(lokasiLahanText);
+        
+        TextView catatanText = new TextView(this);
+        catatanText.setText("Catatan: " + (harvest.getCatatan() != null ? harvest.getCatatan() : "Tidak ada data"));
+        catatanText.setTextSize(16);
+        catatanText.setTextColor(getResources().getColor(android.R.color.black));
+        catatanText.setPadding(0, 15, 0, 15);
+        layout.addView(catatanText);
+        
         TextView tanggalText = new TextView(this);
-        tanggalText.setText("Tanggal Panen: " + harvest.getTanggal());
+        tanggalText.setText("Tanggal Panen: " + (harvest.getTanggal() != null ? harvest.getTanggal() : "Tidak ada data"));
         tanggalText.setTextSize(16);
         tanggalText.setTextColor(getResources().getColor(android.R.color.black));
-        tanggalText.setPadding(0, 10, 0, 10);
+        tanggalText.setPadding(0, 15, 0, 15);
         layout.addView(tanggalText);
         
         TextView statusText = new TextView(this);
         statusText.setText("Status: " + getStatusText(harvest.getStatus()));
         statusText.setTextSize(16);
         statusText.setTextColor(getStatusColor(harvest.getStatus()));
-        statusText.setPadding(0, 10, 0, 10);
+        statusText.setPadding(0, 15, 0, 15);
+        statusText.setTypeface(null, android.graphics.Typeface.BOLD);
         layout.addView(statusText);
         
         TextView createdAtText = new TextView(this);
-        createdAtText.setText("Waktu Input: " + harvest.getCreatedAt());
+        createdAtText.setText("Waktu Input: " + (harvest.getCreatedAt() != null ? harvest.getCreatedAt() : "Tidak ada data"));
         createdAtText.setTextSize(16);
         createdAtText.setTextColor(getResources().getColor(android.R.color.darker_gray));
-        createdAtText.setPadding(0, 10, 0, 10);
+        createdAtText.setPadding(0, 15, 0, 15);
         layout.addView(createdAtText);
         
         builder.setView(layout);
         builder.setPositiveButton("Tutup", null);
-        builder.show();
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        
+        // Set background dialog menjadi putih
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.white);
+    }
+    
+    // Method untuk menampilkan dialog edit data
+    private void showEditHarvestDialog(HarvestListActivity.HarvestData harvest) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
+        builder.setTitle("Edit Data Panen");
+        builder.setMessage("Apakah Anda yakin ingin mengedit data ini?");
+        
+        builder.setPositiveButton("Ya", (dialog, which) -> {
+            // Buka Form dengan data yang sudah ada
+            Intent intent = new Intent(Dashboard.this, Form.class);
+            intent.putExtra("edit_mode", true);
+            intent.putExtra("harvest_id", harvest.getId());
+            intent.putExtra("jenis_tanaman", harvest.getJenis());
+            intent.putExtra("jumlah_panen", harvest.getJumlah());
+            intent.putExtra("satuan", harvest.getSatuan());
+            intent.putExtra("tanggal_panen", harvest.getTanggal());
+            intent.putExtra("luas_lahan", harvest.getLuasLahan());
+            intent.putExtra("musim", harvest.getMusim());
+            intent.putExtra("kualitas", harvest.getKualitas());
+            intent.putExtra("harga_jual", harvest.getHargaJual());
+            intent.putExtra("lokasi_lahan", harvest.getLokasiLahan());
+            intent.putExtra("catatan", harvest.getCatatan());
+            startActivity(intent);
+        });
+        
+        builder.setNegativeButton("Tidak", null);
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.white);
+    }
+    
+    // Method untuk menampilkan dialog konfirmasi hapus
+    private void showDeleteConfirmationDialog(HarvestListActivity.HarvestData harvest) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
+        builder.setTitle("Hapus Data Panen");
+        builder.setMessage("Apakah Anda yakin ingin menghapus data '" + harvest.getJenis() + "'? Data yang sudah dihapus tidak dapat dikembalikan.");
+        
+        builder.setPositiveButton("Ya, Hapus", (dialog, which) -> {
+            deleteHarvestData(harvest.getId());
+        });
+        
+        builder.setNegativeButton("Batal", null);
+        
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.white);
+    }
+    
+    // Method untuk menghapus data dari Firestore
+    private void deleteHarvestData(String harvestId) {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
+        // Tampilkan loading
+        Toast.makeText(this, "Menghapus data...", Toast.LENGTH_SHORT).show();
+        
+        db.collection("harvests").document(harvestId)
+                .delete()
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(Dashboard.this, "Data berhasil dihapus", Toast.LENGTH_SHORT).show();
+                    // Refresh data
+                    loadDashboardData();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(Dashboard.this, "Gagal menghapus data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
     
     // Helper method untuk mendapatkan text status
@@ -470,10 +619,13 @@ public class Dashboard extends AppCompatActivity {
                     
                     for (DocumentSnapshot doc : query.getDocuments()) {
                         System.out.println("Document ID: " + doc.getId());
-                        System.out.println("jenis: " + doc.getString("jenis"));
-                        System.out.println("jumlah: " + doc.getString("jumlah"));
+                        System.out.println("jenisTanaman: " + doc.getString("jenisTanaman"));
+                        System.out.println("jumlahPanen: " + doc.getString("jumlahPanen"));
                         System.out.println("satuan: " + doc.getString("satuan"));
-                        System.out.println("tanggal: " + doc.getString("tanggal"));
+                        System.out.println("tanggalPanen: " + doc.getString("tanggalPanen"));
+                        System.out.println("luasLahan: " + doc.getString("luasLahan"));
+                        System.out.println("musim: " + doc.getString("musim"));
+                        System.out.println("kualitas: " + doc.getString("kualitas"));
                         System.out.println("status: " + doc.getString("status"));
                         System.out.println("createdAt: " + doc.getTimestamp("createdAt"));
                         System.out.println("---");

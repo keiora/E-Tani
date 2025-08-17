@@ -118,6 +118,143 @@
                 android:textColorHint="#999999"
                 android:textColor="#333333"/>
 
+            <!-- Musim -->
+            <TextView
+                android:text="Musim"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            
+            <EditText
+                android:id="@+id/musimEditText"
+                android:hint="Contoh: Musim Hujan, Musim Kemarau"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp"
+                android:padding="12dp"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="#999999"
+                android:textColor="#333333"/>
+
+            <!-- Kualitas -->
+            <TextView
+                android:text="Kualitas Panen"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            
+            <EditText
+                android:id="@+id/kualitasEditText"
+                android:hint="Contoh: Sangat Bagus, Bagus, Sedang"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp"
+                android:padding="12dp"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="#999999"
+                android:textColor="#333333"/>
+
+            <!-- Luas Lahan -->
+            <TextView
+                android:text="Luas Lahan (Hektar)"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            
+            <EditText
+                android:id="@+id/luasLahanEditText"
+                android:hint="Masukkan luas lahan dalam hektar"
+                android:inputType="numberDecimal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp"
+                android:padding="12dp"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="#999999"
+                android:textColor="#333333"/>
+
+            <!-- Harga Jual -->
+            <TextView
+                android:text="Harga Jual (Rp)"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            
+            <EditText
+                android:id="@+id/hargaJualEditText"
+                android:hint="Masukkan harga jual per satuan (opsional)"
+                android:inputType="number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp"
+                android:padding="12dp"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="#999999"
+                android:textColor="#333333"/>
+
+            <!-- Lokasi Lahan -->
+            <TextView
+                android:text="Lokasi Lahan"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            
+            <EditText
+                android:id="@+id/lokasiLahanEditText"
+                android:hint="Contoh: Desa Sukamaju, Kecamatan Cibitung"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp"
+                android:padding="12dp"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="#999999"
+                android:textColor="#333333"/>
+
+            <!-- Catatan -->
+            <TextView
+                android:text="Catatan Tambahan"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#333333"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp" />
+            
+            <EditText
+                android:id="@+id/catatanEditText"
+                android:hint="Catatan khusus tentang panen ini (opsional)"
+                android:inputType="textMultiLine"
+                android:minLines="3"
+                android:maxLines="5"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:textSize="16sp"
+                android:padding="12dp"
+                android:background="@drawable/edittext_background"
+                android:textColorHint="#999999"
+                android:textColor="#333333"/>
+
             <!-- Tanggal Panen -->
             <TextView
                 android:text="Tanggal Panen"

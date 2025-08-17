@@ -109,7 +109,7 @@ public class HarvestListActivity extends AppCompatActivity {
                     harvestList.clear();
                     for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
                         String docStatus = doc.getString("status");
-                        System.out.println("Document status: " + docStatus + ", jenis: " + doc.getString("jenis"));
+                        System.out.println("Document status: " + docStatus + ", jenis: " + doc.getString("jenisTanaman"));
                         
                         // Untuk history, filter data yang sudah selesai
                         if ("history".equals(currentStatus)) {
@@ -124,11 +124,20 @@ public class HarvestListActivity extends AppCompatActivity {
                         
                         HarvestData harvest = new HarvestData();
                         harvest.setId(doc.getId());
-                        harvest.setJenis(doc.getString("jenis"));
-                        harvest.setJumlah(doc.getString("jumlah"));
+                        // Gunakan field baru yang sudah diupdate di Form.java
+                        harvest.setJenis(doc.getString("jenisTanaman"));
+                        harvest.setJumlah(doc.getString("jumlahPanen"));
                         harvest.setSatuan(doc.getString("satuan"));
-                        harvest.setTanggal(doc.getString("tanggal"));
+                        harvest.setTanggal(doc.getString("tanggalPanen"));
                         harvest.setStatus(doc.getString("status"));
+                        
+                        // Set field baru
+                        harvest.setLuasLahan(doc.getString("luasLahan"));
+                        harvest.setMusim(doc.getString("musim"));
+                        harvest.setKualitas(doc.getString("kualitas"));
+                        harvest.setHargaJual(doc.getString("hargaJual"));
+                        harvest.setLokasiLahan(doc.getString("lokasiLahan"));
+                        harvest.setCatatan(doc.getString("catatan"));
                         
                         Timestamp ts = doc.getTimestamp("createdAt");
                         if (ts != null) {
@@ -150,6 +159,7 @@ public class HarvestListActivity extends AppCompatActivity {
 
     public static class HarvestData {
         private String id, jenis, jumlah, satuan, tanggal, status, createdAt;
+        private String luasLahan, musim, kualitas, hargaJual, lokasiLahan, catatan;
 
         // Getters and Setters
         public String getId() { return id; }
@@ -172,5 +182,24 @@ public class HarvestListActivity extends AppCompatActivity {
         
         public String getCreatedAt() { return createdAt; }
         public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
+        
+        // Getters and Setters untuk field baru
+        public String getLuasLahan() { return luasLahan; }
+        public void setLuasLahan(String luasLahan) { this.luasLahan = luasLahan; }
+        
+        public String getMusim() { return musim; }
+        public void setMusim(String musim) { this.musim = musim; }
+        
+        public String getKualitas() { return kualitas; }
+        public void setKualitas(String kualitas) { this.kualitas = kualitas; }
+        
+        public String getHargaJual() { return hargaJual; }
+        public void setHargaJual(String hargaJual) { this.hargaJual = hargaJual; }
+        
+        public String getLokasiLahan() { return lokasiLahan; }
+        public void setLokasiLahan(String lokasiLahan) { this.lokasiLahan = lokasiLahan; }
+        
+        public String getCatatan() { return catatan; }
+        public void setCatatan(String catatan) { this.catatan = catatan; }
     }
 }

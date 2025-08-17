@@ -39,6 +39,38 @@
             android:textColor="#FFFFFF" />
     </LinearLayout>
 
+    <!-- Action Buttons Row (Edit & Delete) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:layout_marginBottom="8dp">
+
+        <ImageView
+            android:id="@+id/editButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="Edit"
+            android:background="@drawable/circle_background_black"
+            android:padding="6dp"
+            android:layout_marginEnd="8dp"
+            android:clickable="true"
+            android:focusable="true" />
+
+        <ImageView
+            android:id="@+id/deleteButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_delete"
+            android:contentDescription="Delete"
+            android:background="@drawable/circle_background_red"
+            android:padding="6dp"
+            android:clickable="true"
+            android:focusable="true" />
+    </LinearLayout>
+
     <!-- Details Row -->
     <LinearLayout
         android:layout_width="match_parent"
