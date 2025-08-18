@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,7 +32,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Form extends AppCompatActivity {
 
-    private EditText jenisTanamanEditText, jumlahPanenEditText, satuanEditText, musimEditText, kualitasEditText, luasLahanEditText, hargaJualEditText, lokasiLahanEditText, catatanEditText, tanggalPanenEditText;
+    private EditText jenisTanamanEditText, jumlahPanenEditText, luasLahanEditText, hargaJualEditText, lokasiLahanEditText, catatanEditText, tanggalPanenEditText;
+    private Spinner satuanSpinner, musimSpinner, kualitasSpinner;
     private Button submitButton;
     private ImageView backButton;
 
@@ -46,9 +49,9 @@ public class Form extends AppCompatActivity {
         // Inisialisasi komponen
         jenisTanamanEditText = findViewById(R.id.jenisTanamanEditText);
         jumlahPanenEditText = findViewById(R.id.jumlahPanenEditText);
-        satuanEditText = findViewById(R.id.satuanEditText);
-        musimEditText = findViewById(R.id.musimEditText);
-        kualitasEditText = findViewById(R.id.kualitasEditText);
+        satuanSpinner = findViewById(R.id.satuanSpinner);
+        musimSpinner = findViewById(R.id.musimSpinner);
+        kualitasSpinner = findViewById(R.id.kualitasSpinner);
         luasLahanEditText = findViewById(R.id.luasLahanEditText);
         hargaJualEditText = findViewById(R.id.hargaJualEditText);
         lokasiLahanEditText = findViewById(R.id.lokasiLahanEditText);
@@ -61,7 +64,8 @@ public class Form extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         
-        // Check apakah ini mode edit
+        // Init spinners & check edit mode
+        setupSpinners();
         checkEditMode();
  
 
@@ -133,10 +137,10 @@ public class Form extends AppCompatActivity {
             tanggalPanenEditText.setText(tanggalPanen);
         }
         
-        // Set EditText values
-        if (satuan != null) satuanEditText.setText(satuan);
-        if (musim != null) musimEditText.setText(musim);
-        if (kualitas != null) kualitasEditText.setText(kualitas);
+        // Preselect spinner values
+        if (satuan != null) preselectSpinner(satuanSpinner, R.array.satuan_options, satuan);
+        if (musim != null) preselectSpinner(musimSpinner, R.array.musim_options, musim);
+        if (kualitas != null) preselectSpinner(kualitasSpinner, R.array.kualitas_options, kualitas);
     }
     
 
@@ -145,9 +149,9 @@ public class Form extends AppCompatActivity {
     private void updateForm() {
         String jenis = jenisTanamanEditText.getText().toString().trim();
         String jumlah = jumlahPanenEditText.getText().toString().trim();
-        String satuan = satuanEditText.getText().toString();
-        String musim = musimEditText.getText().toString();
-        String kualitas = kualitasEditText.getText().toString();
+        String satuan = getSelectedText(satuanSpinner);
+        String musim = getSelectedText(musimSpinner);
+        String kualitas = getSelectedText(kualitasSpinner);
         String tanggal = tanggalPanenEditText.getText().toString().trim();
 
         // Validasi input
@@ -232,9 +236,9 @@ public class Form extends AppCompatActivity {
     private void submitForm() {
         String jenis = jenisTanamanEditText.getText().toString();
         String jumlah = jumlahPanenEditText.getText().toString();
-        String satuan = satuanEditText.getText().toString();
-        String musim = musimEditText.getText().toString();
-        String kualitas = kualitasEditText.getText().toString();
+        String satuan = getSelectedText(satuanSpinner);
+        String musim = getSelectedText(musimSpinner);
+        String kualitas = getSelectedText(kualitasSpinner);
         String luasLahan = luasLahanEditText.getText().toString();
         String hargaJual = hargaJualEditText.getText().toString();
         String lokasiLahan = lokasiLahanEditText.getText().toString();
@@ -256,6 +260,39 @@ public class Form extends AppCompatActivity {
             // Save document dengan data lengkap
             saveDocument(jenis, jumlah, satuan, musim, kualitas, luasLahan, hargaJual, lokasiLahan, catatan, tanggal, currentUser.getUid());
         }
+    }
+
+    private void setupSpinners() {
+        ArrayAdapter<CharSequence> satuanAdapter = ArrayAdapter.createFromResource(this,
+                R.array.satuan_options, R.layout.spinner_item);
+        satuanAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        satuanSpinner.setAdapter(satuanAdapter);
+
+        ArrayAdapter<CharSequence> musimAdapter = ArrayAdapter.createFromResource(this,
+                R.array.musim_options, R.layout.spinner_item);
+        musimAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        musimSpinner.setAdapter(musimAdapter);
+
+        ArrayAdapter<CharSequence> kualitasAdapter = ArrayAdapter.createFromResource(this,
+                R.array.kualitas_options, R.layout.spinner_item);
+        kualitasAdapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        kualitasSpinner.setAdapter(kualitasAdapter);
+    }
+
+    private void preselectSpinner(Spinner spinner, int arrayResId, String value) {
+        if (value == null) return;
+        String[] options = getResources().getStringArray(arrayResId);
+        for (int i = 0; i < options.length; i++) {
+            if (options[i].equalsIgnoreCase(value)) {
+                spinner.setSelection(i);
+                return;
+            }
+        }
+    }
+
+    private String getSelectedText(Spinner spinner) {
+        Object item = spinner.getSelectedItem();
+        return item == null ? "" : item.toString();
     }
  
     private void saveDocument(String jenis, String jumlah, String satuan, String musim, String kualitas, String luasLahan, String hargaJual, String lokasiLahan, String catatan, String tanggal, String uid) {

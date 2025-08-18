@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
+import android.view.MenuItem;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -12,6 +13,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.PopupMenu;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -125,8 +127,7 @@ public class Dashboard extends AppCompatActivity {
         menuIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Dashboard.this, "Menu", Toast.LENGTH_SHORT).show();
-                // TODO: Buka menu atau drawer
+                showLeftMenu(v);
             }
         });
 
@@ -134,8 +135,8 @@ public class Dashboard extends AppCompatActivity {
         profileIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Tampilkan dialog logout
-                showLogoutDialog();
+                // Tampilkan popup menu profil
+                showProfileMenu(v);
             }
         });
 
@@ -165,6 +166,71 @@ public class Dashboard extends AppCompatActivity {
                 loadDashboardData();
             }
         }, 100);
+    }
+
+    private void showLeftMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(this, anchor);
+        popupMenu.getMenuInflater().inflate(R.menu.left_menu, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.action_help_center) {
+                    showHelpCenterDialog();
+                    return true;
+                } else if (id == R.id.action_user_guide) {
+                    showUserGuideDialog();
+                    return true;
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
+    }
+
+    private void showHelpCenterDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
+        builder.setTitle("Pusat Bantuan");
+        builder.setMessage("• Jika mengalami kendala login/registrasi, pastikan koneksi internet stabil dan email benar.\n\n" +
+                "• Untuk pertanyaan tentang data panen, gunakan tombol Add di bawah untuk menambah data, atau tap sebuah item untuk melihat detail.\n\n" +
+                "• Hubungi dukungan: support@etani.app");
+        builder.setPositiveButton("Tutup", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.white);
+    }
+
+    private void showUserGuideDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
+        builder.setTitle("Panduan Pengguna Singkat");
+        builder.setMessage("1. Tambah Data: Tekan tab Add di bawah.\n" +
+                "2. Cari Data: Gunakan kolom pencarian di atas.\n" +
+                "3. Filter: Gunakan tombol 'Semua Data' atau 'History'.\n" +
+                "4. Detail/Edit/Hapus: Tap item untuk detail, gunakan ikon di kartu.\n" +
+                "5. Statistik: Buka tab Statistik untuk ringkasan grafik.");
+        builder.setPositiveButton("Tutup", null);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.white);
+    }
+    private void showProfileMenu(View anchor) {
+        PopupMenu popupMenu = new PopupMenu(this, anchor);
+        popupMenu.getMenuInflater().inflate(R.menu.profile_menu, popupMenu.getMenu());
+        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                int id = item.getItemId();
+                if (id == R.id.action_account_info) {
+                    showAccountInfoDialog();
+                    return true;
+                } else if (id == R.id.action_logout) {
+                    showLogoutDialog();
+                    return true;
+                }
+                return false;
+            }
+        });
+        popupMenu.show();
     }
 
     private void setupBottomNavigation() {
@@ -254,6 +320,81 @@ public class Dashboard extends AppCompatActivity {
         });
         builder.setNegativeButton("Tidak", null);
         builder.show();
+    }
+
+    private void showAccountInfoDialog() {
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.CustomAlertDialog);
+        builder.setTitle("Informasi Akun");
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(50, 30, 50, 30);
+        layout.setBackgroundColor(getResources().getColor(android.R.color.white));
+
+        TextView emailText = new TextView(this);
+        emailText.setText("Email: " + (user.getEmail() != null ? user.getEmail() : "-") );
+        emailText.setTextSize(16);
+        emailText.setTextColor(getResources().getColor(android.R.color.black));
+        emailText.setPadding(0, 15, 0, 15);
+        layout.addView(emailText);
+
+        TextView nameText = new TextView(this);
+        nameText.setText("Nama: " + (user.getDisplayName() != null ? user.getDisplayName() : "-") );
+        nameText.setTextSize(16);
+        nameText.setTextColor(getResources().getColor(android.R.color.black));
+        nameText.setPadding(0, 15, 0, 15);
+        layout.addView(nameText);
+
+        TextView phoneText = new TextView(this);
+        phoneText.setText("Telepon: " + (user.getPhoneNumber() != null ? user.getPhoneNumber() : "-") );
+        phoneText.setTextSize(16);
+        phoneText.setTextColor(getResources().getColor(android.R.color.black));
+        phoneText.setPadding(0, 15, 0, 15);
+        layout.addView(phoneText);
+
+        TextView verifiedText = new TextView(this);
+        verifiedText.setText("Email Terverifikasi: " + (user.isEmailVerified() ? "Ya" : "Tidak"));
+        verifiedText.setTextSize(16);
+        verifiedText.setTextColor(getResources().getColor(android.R.color.black));
+        verifiedText.setPadding(0, 15, 0, 15);
+        layout.addView(verifiedText);
+
+        if (user.getMetadata() != null) {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
+            TextView createdText = new TextView(this);
+            createdText.setText("Dibuat: " + sdf.format(new java.util.Date(user.getMetadata().getCreationTimestamp())));
+            createdText.setTextSize(16);
+            createdText.setTextColor(getResources().getColor(android.R.color.black));
+            createdText.setPadding(0, 15, 0, 15);
+            layout.addView(createdText);
+
+            TextView lastSignInText = new TextView(this);
+            lastSignInText.setText("Terakhir Masuk: " + sdf.format(new java.util.Date(user.getMetadata().getLastSignInTimestamp())));
+            lastSignInText.setTextSize(16);
+            lastSignInText.setTextColor(getResources().getColor(android.R.color.black));
+            lastSignInText.setPadding(0, 15, 0, 15);
+            layout.addView(lastSignInText);
+        }
+
+        TextView uidText = new TextView(this);
+        uidText.setText("UID: " + user.getUid());
+        uidText.setTextSize(14);
+        uidText.setTextColor(getResources().getColor(android.R.color.darker_gray));
+        uidText.setPadding(0, 15, 0, 15);
+        layout.addView(uidText);
+
+        builder.setView(layout);
+        builder.setPositiveButton("Tutup", null);
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        dialog.getWindow().setBackgroundDrawableResource(android.R.color.white);
     }
     
     private void loadDashboardData() {
@@ -576,6 +717,9 @@ public class Dashboard extends AppCompatActivity {
     
     // Helper method untuk mendapatkan text status
     private String getStatusText(String status) {
+        if (status == null || status.isEmpty()) {
+            return "Tidak ada status";
+        }
         switch (status) {
             case "done":
                 return "Disetujui";
@@ -590,6 +734,9 @@ public class Dashboard extends AppCompatActivity {
     
     // Helper method untuk mendapatkan color status
     private int getStatusColor(String status) {
+        if (status == null || status.isEmpty()) {
+            return 0xFF666666; // Gray
+        }
         switch (status) {
             case "done":
                 return 0xFF4CAF50; // Green

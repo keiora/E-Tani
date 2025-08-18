@@ -114,6 +114,9 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
     }
 
     private String getStatusText(String status) {
+        if (status == null || status.isEmpty()) {
+            return "Tidak ada status";
+        }
         switch (status) {
             case "done":
                 return "Disetujui";
@@ -127,6 +130,9 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
     }
 
     private int getStatusColor(String status) {
+        if (status == null || status.isEmpty()) {
+            return 0xFF666666; // Gray
+        }
         switch (status) {
             case "done":
                 return 0xFF4CAF50; // Green

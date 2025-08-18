@@ -105,18 +105,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp" />
-            
-            <EditText
-                android:id="@+id/satuanEditText"
-                android:hint="Contoh: Kg, Ton, Buah"
+
+            <Spinner
+                android:id="@+id/satuanSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textSize="16sp"
-                android:padding="12dp"
                 android:background="@drawable/edittext_background"
-                android:textColorHint="#999999"
-                android:textColor="#333333"/>
+                android:popupBackground="@drawable/spinner_popup_background" />
 
             <!-- Musim -->
             <TextView
@@ -127,18 +123,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp" />
-            
-            <EditText
-                android:id="@+id/musimEditText"
-                android:hint="Contoh: Musim Hujan, Musim Kemarau"
+
+            <Spinner
+                android:id="@+id/musimSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textSize="16sp"
-                android:padding="12dp"
                 android:background="@drawable/edittext_background"
-                android:textColorHint="#999999"
-                android:textColor="#333333"/>
+                android:popupBackground="@drawable/spinner_popup_background" />
 
             <!-- Kualitas -->
             <TextView
@@ -149,18 +141,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp" />
-            
-            <EditText
-                android:id="@+id/kualitasEditText"
-                android:hint="Contoh: Sangat Bagus, Bagus, Sedang"
+
+            <Spinner
+                android:id="@+id/kualitasSpinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                android:textSize="16sp"
-                android:padding="12dp"
                 android:background="@drawable/edittext_background"
-                android:textColorHint="#999999"
-                android:textColor="#333333"/>
+                android:popupBackground="@drawable/spinner_popup_background" />
 
             <!-- Luas Lahan -->
             <TextView

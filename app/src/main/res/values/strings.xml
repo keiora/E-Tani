@@ -7,4 +7,25 @@
     <string name="title_activity_statistic">Statistic</string>
     <!-- Replace with your actual Web client ID from Firebase (ends with .apps.googleusercontent.com) -->
     <string name="default_web_client_id">YOUR_WEB_CLIENT_ID.apps.googleusercontent.com</string>
+
+    <string-array name="satuan_options">
+        <item>Kg</item>
+        <item>Ton</item>
+        <item>Karung</item>
+        <item>Ikat</item>
+        <item>Buah</item>
+    </string-array>
+
+    <string-array name="musim_options">
+        <item>Musim Hujan</item>
+        <item>Musim Kemarau</item>
+        <item>Pancaroba</item>
+    </string-array>
+
+    <string-array name="kualitas_options">
+        <item>Sangat Bagus</item>
+        <item>Bagus</item>
+        <item>Sedang</item>
+        <item>Kurang</item>
+    </string-array>
 </resources>
