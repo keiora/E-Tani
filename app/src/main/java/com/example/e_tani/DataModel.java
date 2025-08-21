@@ -6,60 +6,28 @@ public class DataModel {
     private String satuan;
     private String tanggal;
     private String fotoBase64;
+    private String status;
 
-    public DataModel(String jenisTanaman, String jumlah, String satuan, String tanggal) {
+    public DataModel() {
+        // kosong buat Firestore
+    }
+
+    public DataModel(String jenisTanaman, String jumlah, String satuan, String tanggal, String status) {
         this.jenisTanaman = jenisTanaman;
         this.jumlah = jumlah;
         this.satuan = satuan;
         this.tanggal = tanggal;
-        this.fotoBase64 = "";
+        this.status = status;
+        this.fotoBase64 = null; // biar default kosong
     }
 
-    public DataModel(String jenisTanaman, String jumlah, String satuan, String tanggal, String fotoBase64) {
-        this.jenisTanaman = jenisTanaman;
-        this.jumlah = jumlah;
-        this.satuan = satuan;
-        this.tanggal = tanggal;
-        this.fotoBase64 = fotoBase64;
-    }
+    // Getter & Setter
+    public String getJenisTanaman() { return jenisTanaman; }
+    public String getJumlah() { return jumlah; }
+    public String getSatuan() { return satuan; }
+    public String getTanggal() { return tanggal; }
+    public String getFotoBase64() { return fotoBase64; }
+    public String getStatus() { return status; }
 
-    public String getJenisTanaman() {
-        return jenisTanaman;
-    }
-
-    public void setJenisTanaman(String jenisTanaman) {
-        this.jenisTanaman = jenisTanaman;
-    }
-
-    public String getJumlah() {
-        return jumlah;
-    }
-
-    public void setJumlah(String jumlah) {
-        this.jumlah = jumlah;
-    }
-
-    public String getSatuan() {
-        return satuan;
-    }
-
-    public void setSatuan(String satuan) {
-        this.satuan = satuan;
-    }
-
-    public String getTanggal() {
-        return tanggal;
-    }
-
-    public void setTanggal(String tanggal) {
-        this.tanggal = tanggal;
-    }
-
-    public String getFotoBase64() {
-        return fotoBase64;
-    }
-
-    public void setFotoBase64(String fotoBase64) {
-        this.fotoBase64 = fotoBase64;
-    }
+    public void setStatus(String status) { this.status = status; }
 }

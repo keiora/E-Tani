@@ -96,19 +96,19 @@ public class DetailDataActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(query -> {
                     List<DataModel> dataList = new ArrayList<>();
-                    
+
                     for (DocumentSnapshot doc : query.getDocuments()) {
                         String jenis = doc.getString("jenis");
                         String jumlah = doc.getString("jumlah");
                         String satuan = doc.getString("satuan");
                         String tanggal = doc.getString("tanggal");
                         String status = doc.getString("status");
-                        
+
                         if (jenis != null && jenis.equalsIgnoreCase(jenisTanaman)) {
-                            dataList.add(new DataModel(jenis, jumlah, satuan, tanggal));
+                            dataList.add(new DataModel(jenisTanaman, jumlah, satuan, tanggal, status));
                         }
                     }
-                    
+
                     // Update UI
                     if (dataList.isEmpty()) {
                         emptyState.setVisibility(View.VISIBLE);

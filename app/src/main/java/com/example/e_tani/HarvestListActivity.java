@@ -56,6 +56,17 @@ public class HarvestListActivity extends AppCompatActivity {
         // Setup RecyclerView
         harvestList = new ArrayList<>();
         adapter = new HarvestAdapter(harvestList);
+        adapter.setAdminMode(true); // Aktifkan mode admin
+        adapter.setAdminActionListener(new HarvestAdapter.OnAdminActionListener() {
+            @Override
+            public void onDone(HarvestData harvest, String feedback) {
+                updateHarvestStatus(harvest.id, "done", feedback);
+            }
+            @Override
+            public void onReject(HarvestData harvest, String feedback) {
+                updateHarvestStatus(harvest.id, "rejected", feedback);
+            }
+        });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
@@ -80,81 +91,34 @@ public class HarvestListActivity extends AppCompatActivity {
     }
 
     private void loadHarvestData() {
-        FirebaseUser user = mAuth.getCurrentUser();
-        if (user == null) {
-            Toast.makeText(this, "Silakan login terlebih dahulu", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Debug: print status yang sedang dicari
-        System.out.println("HarvestListActivity: Loading data for status: " + currentStatus);
-
-        Query query = db.collection("harvests")
-                .whereEqualTo("userId", user.getUid());
-
-        // Apply status filter untuk semua status
-        if ("all".equals(currentStatus)) {
-            // Untuk all, ambil semua data tanpa filter status
-            System.out.println("All mode: getting all data without status filter");
-        } else if ("history".equals(currentStatus)) {
-            // Untuk history, ambil data yang sudah selesai (done/reject) atau lama
-            System.out.println("History mode: getting completed data (done/reject)");
-        }
-
-        query.orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    System.out.println("Found " + queryDocumentSnapshots.getDocuments().size() + " documents");
-                    
-                    harvestList.clear();
-                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
-                        String docStatus = doc.getString("status");
-                        System.out.println("Document status: " + docStatus + ", jenis: " + doc.getString("jenisTanaman"));
-                        
-                        // Untuk history, filter data yang sudah selesai
-                        if ("history".equals(currentStatus)) {
-                            if ("waiting".equals(docStatus)) {
-                                continue; // Skip data yang masih waiting
-                            }
-                            // Hanya tampilkan data dengan status done atau reject
-                            if (!"done".equals(docStatus) && !"reject".equals(docStatus)) {
-                                continue;
-                            }
-                        }
-                        
-                        HarvestData harvest = new HarvestData();
-                        harvest.setId(doc.getId());
-                        // Gunakan field baru yang sudah diupdate di Form.java
-                        harvest.setJenis(doc.getString("jenisTanaman"));
-                        harvest.setJumlah(doc.getString("jumlahPanen"));
-                        harvest.setSatuan(doc.getString("satuan"));
-                        harvest.setTanggal(doc.getString("tanggalPanen"));
-                        harvest.setStatus(doc.getString("status"));
-                        
-                        // Set field baru
-                        harvest.setLuasLahan(doc.getString("luasLahan"));
-                        harvest.setMusim(doc.getString("musim"));
-                        harvest.setKualitas(doc.getString("kualitas"));
-                        harvest.setHargaJual(doc.getString("hargaJual"));
-                        harvest.setLokasiLahan(doc.getString("lokasiLahan"));
-                        harvest.setCatatan(doc.getString("catatan"));
-                        
-                        Timestamp ts = doc.getTimestamp("createdAt");
-                        if (ts != null) {
-                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-                            harvest.setCreatedAt(sdf.format(ts.toDate()));
-                        }
-                        
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("harvests")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                harvestList.clear();
+                for (DocumentSnapshot doc : queryDocumentSnapshots) {
+                    HarvestData harvest = doc.toObject(HarvestData.class);
+                    // Contoh filter: hanya tampilkan waiting untuk admin
+                    if ("waiting".equals(harvest.status)) {
                         harvestList.add(harvest);
                     }
-                    
-                    System.out.println("Added " + harvestList.size() + " items to list");
-                    adapter.notifyDataSetChanged();
-                })
-                .addOnFailureListener(e -> {
-                    System.out.println("Error loading harvest data: " + e.getMessage());
-                    Toast.makeText(this, "Gagal memuat data: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                });
+                    // Untuk riwayat petani: if (!"waiting".equals(harvest.status)) { ... }
+                }
+                adapter.notifyDataSetChanged();
+            });
+    }
+
+    private void updateHarvestStatus(String harvestId, String status, String feedback) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db.collection("harvests").document(harvestId)
+            .update("status", status, "feedback", feedback)
+            .addOnSuccessListener(aVoid -> {
+                Toast.makeText(this, "Status berhasil diupdate", Toast.LENGTH_SHORT).show();
+                loadHarvestData();
+            })
+            .addOnFailureListener(e -> {
+                Toast.makeText(this, "Gagal update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
     }
 
     public static class HarvestData {

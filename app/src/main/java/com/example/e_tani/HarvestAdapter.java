@@ -5,6 +5,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.EditText;
+import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
@@ -20,6 +23,14 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
         void onDeleteClick(HarvestListActivity.HarvestData harvest);
     }
 
+    public interface OnAdminActionListener {
+        void onDone(HarvestListActivity.HarvestData harvest, String feedback);
+        void onReject(HarvestListActivity.HarvestData harvest, String feedback);
+    }
+
+    private OnAdminActionListener adminActionListener;
+    private boolean isAdminMode = false;
+
     public HarvestAdapter(List<HarvestListActivity.HarvestData> harvestList) {
         this.harvestList = harvestList;
     }
@@ -27,6 +38,13 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
     public HarvestAdapter(List<HarvestListActivity.HarvestData> harvestList, OnItemClickListener listener) {
         this.harvestList = harvestList;
         this.listener = listener;
+    }
+
+    public void setAdminActionListener(OnAdminActionListener listener) {
+        this.adminActionListener = listener;
+    }
+    public void setAdminMode(boolean isAdmin) {
+        this.isAdminMode = isAdmin;
     }
 
     @NonNull
@@ -106,6 +124,26 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
             holder.editButton.setVisibility(View.GONE);
             holder.deleteButton.setVisibility(View.GONE);
         }
+
+        // Tampilkan tombol jika admin & status waiting
+        if (isAdminMode && "waiting".equals(harvest.getStatus())) {
+            holder.adminActionLayout.setVisibility(View.VISIBLE);
+
+            holder.btnDone.setOnClickListener(v -> {
+                String feedback = holder.feedbackEditText.getText().toString();
+                if (adminActionListener != null) {
+                    adminActionListener.onDone(harvest, feedback);
+                }
+            });
+            holder.btnReject.setOnClickListener(v -> {
+                String feedback = holder.feedbackEditText.getText().toString();
+                if (adminActionListener != null) {
+                    adminActionListener.onReject(harvest, feedback);
+                }
+            });
+        } else {
+            holder.adminActionLayout.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -148,6 +186,9 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
     static class HarvestViewHolder extends RecyclerView.ViewHolder {
         TextView jenisText, jumlahText, tanggalText, statusText, createdAtText;
         ImageView editButton, deleteButton;
+        LinearLayout adminActionLayout;
+        EditText feedbackEditText;
+        Button btnDone, btnReject;
 
         HarvestViewHolder(View itemView) {
             super(itemView);
@@ -158,6 +199,10 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
             createdAtText = itemView.findViewById(R.id.createdAtText);
             editButton = itemView.findViewById(R.id.editButton);
             deleteButton = itemView.findViewById(R.id.deleteButton);
+            adminActionLayout = itemView.findViewById(R.id.adminActionLayout);
+            feedbackEditText = itemView.findViewById(R.id.feedbackEditText);
+            btnDone = itemView.findViewById(R.id.btnDone);
+            btnReject = itemView.findViewById(R.id.btnReject);
         }
     }
 }
