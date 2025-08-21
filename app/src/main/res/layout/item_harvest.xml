@@ -96,6 +96,70 @@
             android:textSize="14sp"
             android:textColor="#666666"
             android:layout_marginBottom="4dp" />
+
+        <!-- Additional details for admin/history -->
+        <TextView
+            android:id="@+id/userText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="User: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
+
+        <TextView
+            android:id="@+id/luasLahanText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Luas Lahan: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
+
+        <TextView
+            android:id="@+id/musimText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Musim: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
+
+        <TextView
+            android:id="@+id/kualitasText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kualitas: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
+
+        <TextView
+            android:id="@+id/lokasiLahanText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Lokasi: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
+
+        <TextView
+            android:id="@+id/hargaJualText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Harga Jual: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
+
+        <TextView
+            android:id="@+id/catatanText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Catatan: -"
+            android:textSize="14sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="2dp" />
     </LinearLayout>
 
     <!-- Created At -->

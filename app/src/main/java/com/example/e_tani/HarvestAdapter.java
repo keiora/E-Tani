@@ -61,33 +61,46 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
         
         // Tampilkan jenis tanaman dengan format yang jelas
         String jenis = harvest.getJenis();
-        if (jenis == null || jenis.isEmpty()) {
-            jenis = "Tidak ada data";
-        }
+        if (jenis == null || jenis.isEmpty()) jenis = "Tidak ada data";
         holder.jenisText.setText(jenis);
         
         // Tampilkan jumlah dengan format yang jelas (contoh: "100 kg")
         String jumlah = harvest.getJumlah();
         String satuan = harvest.getSatuan();
-        if (jumlah == null || jumlah.isEmpty()) {
-            jumlah = "Tidak ada data";
-        }
-        if (satuan == null || satuan.isEmpty()) {
-            satuan = "";
-        }
+        if (jumlah == null || jumlah.isEmpty()) jumlah = "Tidak ada data";
+        if (satuan == null || satuan.isEmpty()) satuan = "";
         String jumlahText = jumlah + " " + satuan;
         holder.jumlahText.setText(jumlahText);
         
         // Tampilkan tanggal dengan format yang jelas
         String tanggal = harvest.getTanggal();
-        if (tanggal == null || tanggal.isEmpty()) {
-            tanggal = "Tidak ada data";
-        }
+        if (tanggal == null || tanggal.isEmpty()) tanggal = "Tidak ada data";
         holder.tanggalText.setText("Tanggal: " + tanggal);
+
+        // Optional fields shown when available (admin/history)
+        TextView userText = holder.itemView.findViewById(R.id.userText);
+        TextView luasLahanText = holder.itemView.findViewById(R.id.luasLahanText);
+        TextView musimText = holder.itemView.findViewById(R.id.musimText);
+        TextView kualitasText = holder.itemView.findViewById(R.id.kualitasText);
+        TextView lokasiLahanText = holder.itemView.findViewById(R.id.lokasiLahanText);
+        TextView hargaJualText = holder.itemView.findViewById(R.id.hargaJualText);
+        TextView catatanText = holder.itemView.findViewById(R.id.catatanText);
+
+        if (userText != null) userText.setText("User: " + safe(harvest.getUserId()));
+        if (luasLahanText != null) luasLahanText.setText("Luas Lahan: " + safe(harvest.getLuasLahan()));
+        if (musimText != null) musimText.setText("Musim: " + safe(harvest.getMusim()));
+        if (kualitasText != null) kualitasText.setText("Kualitas: " + safe(harvest.getKualitas()));
+        if (lokasiLahanText != null) lokasiLahanText.setText("Lokasi: " + safe(harvest.getLokasiLahan()));
+        if (hargaJualText != null) hargaJualText.setText("Harga Jual: " + safe(harvest.getHargaJual()));
+        if (catatanText != null) catatanText.setText("Catatan: " + safe(harvest.getCatatan()));
         
         // Tampilkan status dengan format yang jelas
-        holder.statusText.setText(getStatusText(harvest.getStatus()));
-        holder.statusText.setTextColor(getStatusColor(harvest.getStatus()));
+        String normalizedStatus = harvest.getStatus();
+        if (normalizedStatus != null && normalizedStatus.equalsIgnoreCase("rejected")) {
+            normalizedStatus = "reject";
+        }
+        holder.statusText.setText(getStatusText(normalizedStatus));
+        holder.statusText.setTextColor(getStatusColor(normalizedStatus));
         
         // Tampilkan waktu pembuatan dengan format yang jelas
         String createdAt = harvest.getCreatedAt();
@@ -116,17 +129,24 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
             }
         });
         
-        // Tampilkan/sembunyikan tombol berdasarkan status
-        if ("waiting".equals(harvest.getStatus())) {
-            holder.editButton.setVisibility(View.VISIBLE);
+        // Tampilkan/sembunyikan tombol edit/hapus
+        if (isAdminMode) {
+            // Admin: hanya hapus, tanpa edit (baik waiting maupun history)
+            holder.editButton.setVisibility(View.GONE);
             holder.deleteButton.setVisibility(View.VISIBLE);
         } else {
-            holder.editButton.setVisibility(View.GONE);
-            holder.deleteButton.setVisibility(View.GONE);
+            // User: hanya saat waiting
+            if ("waiting".equals(normalizedStatus)) {
+                holder.editButton.setVisibility(View.VISIBLE);
+                holder.deleteButton.setVisibility(View.VISIBLE);
+            } else {
+                holder.editButton.setVisibility(View.GONE);
+                holder.deleteButton.setVisibility(View.GONE);
+            }
         }
 
         // Tampilkan tombol jika admin & status waiting
-        if (isAdminMode && "waiting".equals(harvest.getStatus())) {
+        if (isAdminMode && "waiting".equals(normalizedStatus)) {
             holder.adminActionLayout.setVisibility(View.VISIBLE);
 
             holder.btnDone.setOnClickListener(v -> {
@@ -204,5 +224,9 @@ public class HarvestAdapter extends RecyclerView.Adapter<HarvestAdapter.HarvestV
             btnDone = itemView.findViewById(R.id.btnDone);
             btnReject = itemView.findViewById(R.id.btnReject);
         }
+    }
+
+    private String safe(String s) {
+        return s == null || s.isEmpty() ? "-" : s;
     }
 }

@@ -34,6 +34,7 @@ public class Statistic extends AppCompatActivity {
     TextView textTotalPanen;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private boolean adminMode = false;
     private ArrayAdapter<String> adapter;
     private final java.util.List<String> tanamanList = new java.util.ArrayList<>();
 
@@ -50,14 +51,23 @@ public class Statistic extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Cek apakah dibuka dari Admin
+        if (getIntent() != null) {
+            adminMode = getIntent().getBooleanExtra("admin_mode", false);
+        }
+
         // Setup spinner adapter
         tanamanList.add("Pilih Tanaman");
         adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tanamanList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        // Load tanaman for current user
-        loadTanamanForCurrentUser();
+        // Load tanaman: per user atau semua (admin)
+        if (adminMode) {
+            loadTanamanForAllUsers();
+        } else {
+            loadTanamanForCurrentUser();
+        }
 
         // Event saat spinner dipilih
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -65,7 +75,11 @@ public class Statistic extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 String selected = parent.getItemAtPosition(position).toString();
                 if (!selected.equals("Pilih Tanaman")) {
-                    tampilkanChartDariFirestore(selected);
+                    if (adminMode) {
+                        tampilkanChartSemuaUser(selected);
+                    } else {
+                        tampilkanChartDariFirestore(selected);
+                    }
                 }
             }
 
@@ -83,6 +97,27 @@ public class Statistic extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    private void loadTanamanForAllUsers() {
+        db.collection("harvests")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    Set<String> uniqueTanaman = new HashSet<>();
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        String jenis = doc.getString("jenisTanaman");
+                        if (jenis != null && !jenis.trim().isEmpty()) {
+                            uniqueTanaman.add(jenis);
+                        }
+                    }
+                    tanamanList.clear();
+                    tanamanList.add("Pilih Tanaman");
+                    tanamanList.addAll(uniqueTanaman);
+                    adapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    textTotalPanen.setText("Gagal memuat tanaman: " + e.getMessage());
+                });
     }
 
     private void loadTanamanForCurrentUser() {
@@ -114,6 +149,72 @@ public class Statistic extends AppCompatActivity {
                 })
                 .addOnFailureListener(e -> {
                     textTotalPanen.setText("Gagal memuat tanaman: " + e.getMessage());
+                });
+    }
+
+    // Admin: tampilkan chart dari semua user, range 6 bulan terakhir
+    private void tampilkanChartSemuaUser(String tanaman) {
+        java.util.Calendar cal = java.util.Calendar.getInstance();
+        java.util.Date endDate = cal.getTime();
+        cal.add(java.util.Calendar.MONTH, -6);
+        java.util.Date startDate = cal.getTime();
+
+        db.collection("harvests")
+                .whereEqualTo("jenisTanaman", tanaman)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    float[] totalPerBulan = new float[12];
+                    float totalKeseluruhan = 0f;
+                    String satuan = "";
+
+                    for (DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        com.google.firebase.Timestamp ts = doc.getTimestamp("createdAt");
+                        if (ts == null) continue;
+                        java.util.Date d = ts.toDate();
+                        if (d.before(startDate) || d.after(endDate)) continue; // batasi 6 bulan terakhir
+
+                        String jumlahStr = doc.getString("jumlahPanen");
+                        String satuanDoc = doc.getString("satuan");
+                        if (satuan.isEmpty() && satuanDoc != null) {
+                            satuan = satuanDoc;
+                        }
+                        float jumlah = 0f;
+                        try { if (jumlahStr != null) jumlah = Float.parseFloat(jumlahStr); } catch (Exception ignored) {}
+
+                        java.util.Calendar c = java.util.Calendar.getInstance();
+                        c.setTime(d);
+                        int monthIndex = c.get(java.util.Calendar.MONTH);
+                        totalPerBulan[monthIndex] += jumlah;
+                        totalKeseluruhan += jumlah;
+                    }
+
+                    ArrayList<BarEntry> entries = new ArrayList<>();
+                    for (int i = 0; i < 12; i++) {
+                        entries.add(new BarEntry(i, totalPerBulan[i]));
+                    }
+
+                    BarDataSet dataSet = new BarDataSet(entries, "Panen per Bulan (6 bln terakhir)");
+                    dataSet.setColor(Color.parseColor("#4CAF50"));
+                    dataSet.setValueTextSize(12f);
+
+                    BarData barData = new BarData(dataSet);
+                    barChart.setData(barData);
+
+                    String[] bulan = {"Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"};
+                    barChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(bulan));
+                    barChart.getXAxis().setGranularity(1f);
+                    barChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+                    barChart.getAxisLeft().setAxisMinimum(0f);
+                    barChart.getAxisRight().setAxisMinimum(0f);
+
+                    barChart.animateY(1000);
+                    barChart.invalidate();
+
+                    String suffix = satuan != null && !satuan.isEmpty() ? (" " + satuan) : "";
+                    textTotalPanen.setText("Total Panen (6 bln): " + formatNumber(totalKeseluruhan) + suffix);
+                })
+                .addOnFailureListener(e -> {
+                    textTotalPanen.setText("Gagal memuat data: " + e.getMessage());
                 });
     }
 

@@ -11,6 +11,14 @@ public class Harvest {
 
     // tambahan untuk display
     private String namaPetani;
+    private String userEmail;
+    private String kualitas;
+    private String lokasiLahan;
+    private String luasLahan;
+    private String musim;
+    private String hargaJual;
+    private String catatan;
+    private String createdAt; // formatted display
 
     public Harvest() {}
 
@@ -47,4 +55,28 @@ public class Harvest {
 
     public String getNamaPetani() { return namaPetani; }
     public void setNamaPetani(String namaPetani) { this.namaPetani = namaPetani; }
+
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getKualitas() { return kualitas; }
+    public void setKualitas(String kualitas) { this.kualitas = kualitas; }
+
+    public String getLokasiLahan() { return lokasiLahan; }
+    public void setLokasiLahan(String lokasiLahan) { this.lokasiLahan = lokasiLahan; }
+
+    public String getLuasLahan() { return luasLahan; }
+    public void setLuasLahan(String luasLahan) { this.luasLahan = luasLahan; }
+
+    public String getMusim() { return musim; }
+    public void setMusim(String musim) { this.musim = musim; }
+
+    public String getHargaJual() { return hargaJual; }
+    public void setHargaJual(String hargaJual) { this.hargaJual = hargaJual; }
+
+    public String getCatatan() { return catatan; }
+    public void setCatatan(String catatan) { this.catatan = catatan; }
+
+    public String getCreatedAt() { return createdAt; }
+    public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
 }

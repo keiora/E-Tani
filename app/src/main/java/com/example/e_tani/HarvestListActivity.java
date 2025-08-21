@@ -29,6 +29,7 @@ public class HarvestListActivity extends AppCompatActivity {
     private String currentStatus;
     private HarvestAdapter adapter;
     private List<HarvestData> harvestList;
+    private boolean isAdminMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +41,7 @@ public class HarvestListActivity extends AppCompatActivity {
         if (currentStatus == null) {
             currentStatus = "waiting";
         }
+        isAdminMode = getIntent().getBooleanExtra("admin_mode", false);
 
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
@@ -55,8 +57,17 @@ public class HarvestListActivity extends AppCompatActivity {
 
         // Setup RecyclerView
         harvestList = new ArrayList<>();
-        adapter = new HarvestAdapter(harvestList);
-        adapter.setAdminMode(true); // Aktifkan mode admin
+        adapter = new HarvestAdapter(harvestList, new HarvestAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(HarvestData harvest) { /* no-op */ }
+            @Override
+            public void onEditClick(HarvestData harvest) { /* disabled for admin */ }
+            @Override
+            public void onDeleteClick(HarvestData harvest) {
+                confirmAndDelete(harvest);
+            }
+        });
+        adapter.setAdminMode(isAdminMode); // Aktifkan mode admin hanya untuk admin
         adapter.setAdminActionListener(new HarvestAdapter.OnAdminActionListener() {
             @Override
             public void onDone(HarvestData harvest, String feedback) {
@@ -64,7 +75,7 @@ public class HarvestListActivity extends AppCompatActivity {
             }
             @Override
             public void onReject(HarvestData harvest, String feedback) {
-                updateHarvestStatus(harvest.id, "rejected", feedback);
+                updateHarvestStatus(harvest.id, "reject", feedback);
             }
         });
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -92,26 +103,111 @@ public class HarvestListActivity extends AppCompatActivity {
 
     private void loadHarvestData() {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("harvests")
-            .get()
+
+        com.google.firebase.firestore.Query query = db.collection("harvests");
+
+        // Terapkan filter berdasarkan status/tab
+        if ("history".equalsIgnoreCase(currentStatus)) {
+            java.util.List<String> historyStatuses = new java.util.ArrayList<>();
+            // tangkap berbagai variasi kapitalisasi
+            historyStatuses.add("done");
+            historyStatuses.add("Done");
+            historyStatuses.add("DONE");
+            historyStatuses.add("reject");
+            historyStatuses.add("Reject");
+            historyStatuses.add("REJECT");
+            historyStatuses.add("rejected");
+            historyStatuses.add("Rejected");
+            historyStatuses.add("REJECTED");
+            query = query.whereIn("status", historyStatuses);
+        } else if ("all".equalsIgnoreCase(currentStatus)) {
+            // tanpa filter status
+        } else {
+            // default waiting
+            java.util.List<String> waiting = new java.util.ArrayList<>();
+            waiting.add("waiting");
+            waiting.add("Waiting");
+            waiting.add("WAITING");
+            query = query.whereIn("status", waiting);
+        }
+
+        // Jika bukan admin mode, batasi ke user yang sedang login
+        if (!isAdminMode) {
+            FirebaseUser current = FirebaseAuth.getInstance().getCurrentUser();
+            if (current != null) {
+                query = query.whereEqualTo("userId", current.getUid());
+            }
+        }
+
+        query.get()
             .addOnSuccessListener(queryDocumentSnapshots -> {
                 harvestList.clear();
                 for (DocumentSnapshot doc : queryDocumentSnapshots) {
-                    HarvestData harvest = doc.toObject(HarvestData.class);
-                    // Contoh filter: hanya tampilkan waiting untuk admin
-                    if ("waiting".equals(harvest.status)) {
-                        harvestList.add(harvest);
+                    // Map manual agar konsisten dengan field Firestore saat ini
+                    HarvestData harvest = new HarvestData();
+                    harvest.setId(doc.getId());
+                    // Fallback ke nama field lama jika ada dokumen lama
+                    String jenis = doc.getString("jenisTanaman");
+                    if (jenis == null || jenis.isEmpty()) jenis = doc.getString("jenis");
+                    harvest.setJenis(jenis);
+
+                    String jumlah = doc.getString("jumlahPanen");
+                    if (jumlah == null || jumlah.isEmpty()) jumlah = doc.getString("jumlah");
+                    harvest.setJumlah(jumlah);
+
+                    harvest.setSatuan(doc.getString("satuan"));
+
+                    String tanggal = doc.getString("tanggalPanen");
+                    if (tanggal == null || tanggal.isEmpty()) tanggal = doc.getString("tanggal");
+                    harvest.setTanggal(tanggal);
+
+                    // field tambahan
+                    harvest.setLuasLahan(doc.getString("luasLahan"));
+                    harvest.setMusim(doc.getString("musim"));
+                    harvest.setKualitas(doc.getString("kualitas"));
+                    harvest.setHargaJual(doc.getString("hargaJual"));
+                    harvest.setLokasiLahan(doc.getString("lokasiLahan"));
+                    harvest.setCatatan(doc.getString("catatan"));
+                    harvest.setUserId(doc.getString("userId"));
+                    harvest.setUserEmail(doc.getString("userEmail"));
+                    String status = doc.getString("status");
+                    if (status != null && status.equalsIgnoreCase("rejected")) status = "reject";
+                    harvest.setStatus(status);
+
+                    com.google.firebase.Timestamp ts = doc.getTimestamp("createdAt");
+                    if (ts != null) {
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault());
+                        harvest.setCreatedAt(sdf.format(ts.toDate()));
                     }
-                    // Untuk riwayat petani: if (!"waiting".equals(harvest.status)) { ... }
+
+                    harvestList.add(harvest);
                 }
                 adapter.notifyDataSetChanged();
             });
     }
 
+    private void confirmAndDelete(HarvestData harvest) {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Hapus Data")
+                .setMessage("Yakin hapus data '" + (harvest.getJenis() != null ? harvest.getJenis() : "-") + "'?")
+                .setPositiveButton("Hapus", (d, w) -> {
+                    FirebaseFirestore.getInstance().collection("harvests").document(harvest.getId())
+                            .delete()
+                            .addOnSuccessListener(aVoid -> {
+                                Toast.makeText(this, "Data berhasil dihapus", Toast.LENGTH_SHORT).show();
+                                loadHarvestData();
+                            })
+                            .addOnFailureListener(e -> Toast.makeText(this, "Gagal menghapus: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                })
+                .setNegativeButton("Batal", null)
+                .show();
+    }
+
     private void updateHarvestStatus(String harvestId, String status, String feedback) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String normalized = status == null ? null : status.toLowerCase(java.util.Locale.getDefault());
         db.collection("harvests").document(harvestId)
-            .update("status", status, "feedback", feedback)
+            .update("status", normalized, "feedback", feedback)
             .addOnSuccessListener(aVoid -> {
                 Toast.makeText(this, "Status berhasil diupdate", Toast.LENGTH_SHORT).show();
                 loadHarvestData();
@@ -124,6 +220,7 @@ public class HarvestListActivity extends AppCompatActivity {
     public static class HarvestData {
         private String id, jenis, jumlah, satuan, tanggal, status, createdAt;
         private String luasLahan, musim, kualitas, hargaJual, lokasiLahan, catatan;
+        private String userId, userEmail, userName;
 
         // Getters and Setters
         public String getId() { return id; }
@@ -165,5 +262,14 @@ public class HarvestListActivity extends AppCompatActivity {
         
         public String getCatatan() { return catatan; }
         public void setCatatan(String catatan) { this.catatan = catatan; }
+
+        public String getUserId() { return userId; }
+        public void setUserId(String userId) { this.userId = userId; }
+
+        public String getUserEmail() { return userEmail; }
+        public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+        public String getUserName() { return userName; }
+        public void setUserName(String userName) { this.userName = userName; }
     }
 }
